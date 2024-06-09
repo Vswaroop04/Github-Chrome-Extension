@@ -17,11 +17,12 @@
       "32": "images/icon.png"
     },
     "default_title": "Github Push Notifications",
-    "default_popup": "popup.html"
+    "default_popup": "index.html"
   },
   "options_page": "options.html",
-  "permissions": ["storage", "alarms", "notifications"],
+  "permissions": ["scripting", "storage", "alarms", "notifications"],
   "background": {
     "service_worker": "background.js"
-  }
+  },
+  "host_permissions": ["http://*/*", "https://*/*"]
 }
