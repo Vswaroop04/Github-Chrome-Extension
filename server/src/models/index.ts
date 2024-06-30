@@ -1,7 +1,7 @@
 export interface User {
 	name: string;
-	email: string;
+	email?: string;
 	githubUrl: string;
-	githubRepos: string[];
-	extensionId: string;
+	githubRepos?: string[];
+	extensionId?: string;
 }

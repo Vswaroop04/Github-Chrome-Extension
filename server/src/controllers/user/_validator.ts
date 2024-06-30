@@ -8,5 +8,13 @@ export const userSchemaValidator = z.object({
 	githubRepos: z.array(z.string()),
 	extensionId: z.string().min(1, 'Extension ID is required'),
 });
+export const idSchema = z.object({
+	id: z.string().min(1, 'ID is required'),
+});
+
+export const accessCodeSchema = z.object({
+	code: z.string().min(1, 'ID is required'),
+});
+
 
 export type User = z.infer<typeof userSchemaValidator>;

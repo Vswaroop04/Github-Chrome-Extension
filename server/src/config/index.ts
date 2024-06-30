@@ -12,6 +12,8 @@ const {
 	MESSAGING_SENDER_ID,
 	APP_ID,
 	MEASUREMENT_ID,
+	GITHUB_CLIENT_ID,
+	GITHUB_CLIENT_SECRET,
 } = process.env;
 
 assert(PORT, 'PORT is required');
@@ -23,6 +25,8 @@ assert(STORAGE_BUCKET, 'Firebase STORAGE_BUCKET is required');
 assert(MESSAGING_SENDER_ID, 'Firebase MESSAGING_SENDER_ID is required');
 assert(APP_ID, 'Firebase APP_ID is required');
 assert(MEASUREMENT_ID, 'Firebase MEASUREMENT_ID is required');
+assert(GITHUB_CLIENT_ID, 'Github Client Id Is Undefined In ENV');
+assert(GITHUB_CLIENT_SECRET, 'Github Client Secret Is Undefined In ENV');
 
 export const firebaseConfig = {
 	apiKey: API_KEY,
@@ -34,4 +38,9 @@ export const firebaseConfig = {
 	measurementId: MEASUREMENT_ID,
 };
 
-export default PORT
+export const githubConfig = {
+	githubClientId: GITHUB_CLIENT_ID,
+	githubClientSecret: GITHUB_CLIENT_SECRET,
+};
+
+export default PORT;
