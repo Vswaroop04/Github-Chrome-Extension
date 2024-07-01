@@ -86,7 +86,7 @@ export const getRepositories = async (
 	}
 };
 
-export const addWebhook = async (
+export const addWebhookForPersonalRepo = async (
 	accessToken: string,
 	owner: string,
 	repo: string,
@@ -113,8 +113,43 @@ export const addWebhook = async (
 				}),
 			},
 		);
+		const data = await response.json();
+		return data;
+	} catch (error) {
+		console.error('Error adding webhook:', error);
+		return false;
+	}
+};
 
-		return response.ok;
+export const addWebhookForOrganizationRepo = async (
+	accessToken: string,
+	organization: string,
+	repo: string,
+	webhookUrl: string,
+) => {
+	try {
+		const response = await fetch(
+			`https://api.github.com/repos/${organization}/${repo}/hooks`,
+			{
+				method: 'POST',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					'Content-Type': 'application/json',
+					Accept: 'application/json',
+				},
+				body: JSON.stringify({
+					name: 'web',
+					active: true,
+					events: ['push', 'pull_request'],
+					config: {
+						url: webhookUrl,
+						content_type: 'json',
+					},
+				}),
+			},
+		);
+		const data = await response.json();
+		return data;
 	} catch (error) {
 		console.error('Error adding webhook:', error);
 		return false;

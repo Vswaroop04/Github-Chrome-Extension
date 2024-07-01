@@ -31,6 +31,7 @@ export const registerUser = async (
 			message: 'Access Token Fetched Successfuly',
 			accessToken,
 			userRepos,
+			subscribedRepos: userAlreadyExists?.subscribedRepos,
 		});
 	} catch (error) {
 		if (error instanceof z.ZodError) {

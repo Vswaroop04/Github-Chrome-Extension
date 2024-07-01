@@ -1,23 +1,52 @@
-import { getRepositories } from './../../services/github';
-import { Request, Response, NextFunction } from 'express';
 import {
-	accessCodeSchema,
-	userSchemaValidator,
-} from '@/controllers/user/_validator';
+	addWebhookForOrganizationRepo,
+	addWebhookForPersonalRepo,
+} from '@/services/github';
+import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
-import { addUser, getUserByGithubUrl } from '@/services/user';
-import { getAccessToken, getUserData } from '@/services/github';
+import { repoLinkValidator } from './_validator';
+import { REPO_WEBHOOK_URL } from '@/config';
+import { getUserByGithubUrl, updateRepoSubscription } from '@/services/user';
 
-export const registerUser = async (
+export const subscribeRepo = async (
 	req: Request,
 	res: Response,
 	next: NextFunction,
 ) => {
 	try {
-		
-		res.status(200).send({
-			message: 'Access Token Fetched Successfuly',
-	
+		const accessToken = req.get('Authorization');
+		if (!accessToken) return res.status(401).json({ message: 'Unauthorized' });
+		const { repoLink } = repoLinkValidator.parse(req.body);
+		const parts = repoLink.split('/');
+		const owner = parts[3].toLowerCase();
+		const baseGithubUrl = parts.slice(0, 4).join('/');
+		const user = await getUserByGithubUrl(baseGithubUrl);
+		const repoName = parts[4].toLowerCase();
+		let webHook;
+		if (user) {
+			webHook = await addWebhookForPersonalRepo(
+				accessToken,
+				owner,
+				repoName,
+				REPO_WEBHOOK_URL,
+			);
+		} else {
+			webHook = await addWebhookForOrganizationRepo(
+				accessToken,
+				owner,
+				repoName,
+				REPO_WEBHOOK_URL,
+			);
+		}
+		if (!webHook) throw Error('Issue In Creating Webhook');
+		if (webHook.active) {
+			await updateRepoSubscription(baseGithubUrl, repoLink);
+		}
+		res.status(webHook.status ? parseInt(webHook.status) : 200).send({
+			message:
+				webHook.errors?.length > 0
+					? webHook.errors[0].message
+					: 'Webhook Created',
 		});
 	} catch (error) {
 		if (error instanceof z.ZodError) {

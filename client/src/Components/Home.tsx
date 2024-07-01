@@ -3,10 +3,15 @@ import { getAccessToken } from "../fetchers/getAccessToken";
 
 // Import Tailwind CSS styles
 import "tailwindcss/tailwind.css";
+import { subscribeRepoPostReq } from "../fetchers/subscribeRepo";
 
 export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
   const [repos, setRepos] = useState<string[]>([]);
+  const [subscribedRepos, setSubscribedRepos] = useState<string[]>([]);
+  const [accessToken, setAccessToken] = useState<string>("");
+  const [repoSubscribeErrorMessage, setRepoSubscribeErrorMessage] =
+    useState<string>("");
 
   useEffect(() => {
     const fetchAccessToken = async () => {
@@ -22,18 +27,18 @@ export default function Home() {
             data.userRepos.length > 0
           ) {
             setRepos(data.userRepos);
-            chrome.storage.local.set({ accessToken: data.accessToken }, () => {
-              console.log("Access token stored in Chrome storage");
-            });
+            setAccessToken(data.accessToken);
+            setSubscribedRepos(data.subscribedRepos);
+            // chrome.storage.local.set({ accessToken: data.accessToken }, () => {
+            //   console.log("Access token stored in Chrome storage");
+            // });
           } else {
             throw new Error("Failed to fetch valid user repositories");
           }
         } catch (error) {
           console.error("Error fetching access token:", error);
         } finally {
-          setTimeout(() => {
-            setLoading(false);
-          }, 1700);
+          setLoading(false);
         }
       }
     };
@@ -41,8 +46,7 @@ export default function Home() {
     fetchAccessToken();
 
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
-  // Empty dependency array ensures useEffect runs once on component mount
+  }, []); // Empty dependency array ensures useEffect runs once on component mount
 
   function loginWithGithub() {
     window.location.assign(
@@ -52,10 +56,16 @@ export default function Home() {
     );
   }
 
-  function handleClick(repo: string) {
+  async function handleClick(repo: string) {
     // Function to handle click action
     console.log("Button clicked for repo:", repo);
-    // Add your logic here
+    const repoSub = await subscribeRepoPostReq(accessToken, repo);
+    if (!repoSub.ok) {
+      console.error("Error subscribing to repo:", repoSub.message);
+      if (repoSub != "Webhook Created") {
+        setRepoSubscribeErrorMessage(repoSub.message);
+      }
+    }
   }
 
   return (
@@ -84,61 +94,128 @@ export default function Home() {
           <span className="sr-only">Loading...</span>
         </div>
       ) : (
-        <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
-          <div className="max-w-4xl w-full mx-auto p-8 rounded-lg shadow-lg bg-gray-800">
-            {repos.length > 0 ? (
-              <table className="min-w-full divide-y divide-gray-700">
-                <thead className="bg-gray-700">
-                  <tr>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Repository Name
-                    </th>
-                    <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-gray-700">
-                  {repos.map((repo, index) => {
-                    const repoName = repo.substring(repo.indexOf("/") + 1);
-                    const repoNameAfter = repoName.substring(
-                      repoName.indexOf("/") + 1
-                    );
-                    const repoNameAfterSecondSlash = repoNameAfter.substring(
-                      repoNameAfter.indexOf("/") + 1
-                    );
+        <>
+          {repoSubscribeErrorMessage.length > 0 ? (
+            <div className="min-h-screen flex items-center justify-center text-red-700 font-bold text-xl">
+              {repoSubscribeErrorMessage}
+            </div>
+          ) : (
+            <div className="min-h-screen flex items-center justify-center bg-gray-900 text-white">
+              <div className="max-w-4xl w-full mx-auto p-8 rounded-lg shadow-lg bg-gray-800">
+                {repos?.length > 0 ? (
+                  <div>
+                    {subscribedRepos?.length > 0 && (
+                      <>
+                        <h1 className="text-center text-lg py-4 font-medium">
+                          {" "}
+                          Subscribed Repos{" "}
+                        </h1>
+                        <table className="min-w-full divide-y divide-gray-700">
+                          <thead className="bg-gray-700">
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                Repository Name
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                                Actions
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody className="divide-y divide-gray-700">
+                            {subscribedRepos?.map((repo, index) => {
+                              const repoName = repo.substring(
+                                repo.indexOf("/") + 1
+                              );
+                              const repoNameAfter = repoName.substring(
+                                repoName.indexOf("/") + 1
+                              );
+                              const repoNameAfterSecondSlash =
+                                repoNameAfter.substring(
+                                  repoNameAfter.indexOf("/") + 1
+                                );
 
-                    return (
-                      <tr key={index} className="hover:bg-gray-700">
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300">
-                          {repoNameAfterSecondSlash}
-                        </td>
-                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300">
-                          <button
-                            onClick={() => handleClick(repo)}
-                            className="px-6 py-3 bg-gray-600 hover:bg-gray-700 rounded-lg text-white"
-                          >
-                            Subscribe
-                          </button>
-                        </td>
-                        {/* Add more columns as needed */}
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            ) : (
-              <div className="flex items-center justify-center">
-                <button
-                  onClick={loginWithGithub}
-                  className="px-6 py-3 bg-gray-600 hover:bg-gray-700 rounded-lg text-white"
-                >
-                  Login with GitHub
-                </button>
+                              return (
+                                <tr key={index} className="hover:bg-gray-700">
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300">
+                                    {repoNameAfterSecondSlash}
+                                  </td>
+                                  <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300">
+                                    <div className="px-6 py-3  rounded-lg text-white">
+                                      Subscribed
+                                    </div>
+                                  </td>
+                                  {/* Add more columns as needed */}
+                                </tr>
+                              );
+                            })}
+                          </tbody>
+                        </table>
+                      </>
+                    )}
+
+                    <h1 className="text-center text-lg py-4 font-medium">
+                      {" "}
+                      Repositries{" "}
+                    </h1>
+
+                    <table className="min-w-full divide-y divide-gray-700">
+                      <thead className="bg-gray-700">
+                        <tr>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                            Repository Name
+                          </th>
+                          <th className="px-6 py-3 text-left text-xs font-medium text-gray-300 uppercase tracking-wider">
+                            Actions
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-gray-700">
+                        {repos.map((repo, index) => {
+                          const repoName = repo.substring(
+                            repo.indexOf("/") + 1
+                          );
+                          const repoNameAfter = repoName.substring(
+                            repoName.indexOf("/") + 1
+                          );
+                          const repoNameAfterSecondSlash =
+                            repoNameAfter.substring(
+                              repoNameAfter.indexOf("/") + 1
+                            );
+
+                          return (
+                            <tr key={index} className="hover:bg-gray-700">
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300">
+                                {repoNameAfterSecondSlash}
+                              </td>
+                              <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-300">
+                                <button
+                                  onClick={() => handleClick(repo)}
+                                  className="px-6 py-3 bg-gray-600 hover:bg-gray-700 rounded-lg text-white"
+                                >
+                                  Subscribe
+                                </button>
+                              </td>
+                              {/* Add more columns as needed */}
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
+                ) : (
+                  <div className="flex items-center justify-center">
+                    <button
+                      onClick={loginWithGithub}
+                      className="px-6 py-3 bg-gray-600 hover:bg-gray-700 rounded-lg text-white"
+                    >
+                      Login with GitHub
+                    </button>
+                  </div>
+                )}
               </div>
-            )}
-          </div>
-        </div>
+            </div>
+          )}
+        </>
       )}
     </>
   );
