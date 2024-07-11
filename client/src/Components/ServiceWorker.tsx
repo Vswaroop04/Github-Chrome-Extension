@@ -1,14 +1,16 @@
 export default function Home() {
-  function loginWithGithub() {
-    window.location.assign(
-      "https://github.com/login/oauth/authorize?client_id=" +
-        import.meta.env.VITE_GITHUB_CLIENT_ID
-    );
-  }
+  // background.js
 
-  return (
-    <div>
-      <button onClick={loginWithGithub}>Login with GitHub</button>
-    </div>
-  );
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    console.log(sender)
+    if (message.action === "open_github_auth") {
+      const url = `https://github.com/login/oauth/authorize?client_id=${message.clientId}&scope=repo read:org admin:repo_hook`;
+      chrome.tabs.create({ url }, () => {
+        sendResponse({ status: "success" });
+      });
+      return true; // Keep the message channel open for sendResponse
+    }
+  });
+
+  return <div></div>;
 }

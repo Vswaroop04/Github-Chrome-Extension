@@ -45,8 +45,7 @@ export default function Home() {
 
     fetchAccessToken();
 
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Empty dependency array ensures useEffect runs once on component mount
+  }, []); 
 
   function loginWithGithub() {
     window.location.assign(

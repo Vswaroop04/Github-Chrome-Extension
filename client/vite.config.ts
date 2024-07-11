@@ -9,9 +9,10 @@ export default defineConfig({
       input: {
         main: "src/main.tsx",
         index: "index.html",
-        serviceworker: "ServiceWorker.html", 
+        serviceworker: "ServiceWorker.html",
       },
       output: {
+        format: "es",
         entryFileNames: "[name].js",
         chunkFileNames: "[name].js",
         assetFileNames: "[name].[ext]",
