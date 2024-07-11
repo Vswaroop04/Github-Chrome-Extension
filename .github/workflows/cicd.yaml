@@ -20,4 +20,6 @@ jobs:
           echo "Deploying to production"
           echo "$SSH_PRIVATE_KEY" > keyfile
           chmod 600 keyfile
+          mkdir -p ~/.ssh
+          cp known_hosts ~/.ssh/known_hosts
           ssh -i keyfile ubuntu@${{ secrets.INSTANCE_IP }} "sudo bash ~/deploy.sh"
