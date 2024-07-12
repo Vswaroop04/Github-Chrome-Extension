@@ -18,23 +18,27 @@ export const createWebHook = async (
 		if (!req.body.repository) {
 			return res.status(400).json({ message: 'Invalid request' });
 		}
-		const parts = req.body.repository.html_url.split('/');
-		const baseGithubUrl = parts.slice(0, 4).join('/');
-		const user = await getUserByGithubUrl(baseGithubUrl);
-		const repoName = extractRepoNameFromUrl(req.body.repository.html_url);
+		if (req.body.pull_request || req.body.pusher) {
+			const parts = req.body.repository.html_url.split('/');
+			const baseGithubUrl = parts.slice(0, 4).join('/');
+			const user = await getUserByGithubUrl(baseGithubUrl);
+			const repoName = extractRepoNameFromUrl(req.body.repository.html_url);
 
-		await sendPushNotification(
-			user.gcmToken,
-			req.body.action == 'opened'
-				? `${req.body.sender.login} created a new pull request in ${repoName}`
-				: `${req.body.pusher.name} added new commit in ${repoName}`,
-			req.body.action == 'opened'
-				? `Please take a look: A new pull request has been created in the repository ${repoName}. Click here to view: ${req.body.repository.html_url}`
-				: `New changes have been pushed to the repository ${repoName}. Click here to review: ${req.body.repository.html_url}`,
+			await sendPushNotification(
+				user.gcmToken,
+				req.body.action == 'opened'
+					? `${req.body.sender.login} created a new pull request in ${repoName}`
+					: `${req.body.pusher.name} added new commit in ${repoName}`,
+				req.body.action == 'opened'
+					? `Please take a look: A new pull request has been created in the repository ${repoName}. Click here to view: ${req.body.repository.html_url}`
+					: `New changes have been pushed to the repository ${repoName}. Click here to review: ${req.body.repository.html_url}`,
 
-			{ url: req.body.repository.html_url },
-		);
-		res.status(200).json({ message: 'Push Notification sent succesfully' });
+				{ url: req.body.repository.html_url },
+			);
+			res.status(200).json({ message: 'Push Notification sent succesfully' });
+		} else {
+			res.status(400).json({ message: 'Invalid request' });
+		}
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			res

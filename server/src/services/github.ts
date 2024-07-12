@@ -129,7 +129,7 @@ export const addWebhookForOrganizationRepo = async (
 ) => {
 	try {
 		const response = await fetch(
-			`https://api.github.com/repos/${organization}/${repo}/hooks`,
+			`https://api.github.com/orgs/${organization}/hooks`,
 			{
 				method: 'POST',
 				headers: {

@@ -82,7 +82,6 @@ export default function Home() {
                       currentToken
                     );
                     if (!repoSub.ok) {
-                      toast.error("Error Subscribing to Repo");
                       if (repoSub != "Webhook Created") {
                         setRepoSubscribeErrorMessage(repoSub.message);
                       }
