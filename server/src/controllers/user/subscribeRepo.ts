@@ -16,6 +16,9 @@ export const subscribeRepo = async (
 	try {
 		const accessToken = req.get('Authorization');
 		if (!accessToken) return res.status(401).json({ message: 'Unauthorized' });
+		if (!req.body.token) {
+			return res.status(400).json({ message: 'Missing token' });
+		}
 		const { repoLink } = repoLinkValidator.parse(req.body);
 		const parts = repoLink.split('/');
 		const owner = parts[3].toLowerCase();
@@ -40,7 +43,7 @@ export const subscribeRepo = async (
 		}
 		if (!webHook) throw Error('Issue In Creating Webhook');
 		if (webHook.active) {
-			await updateRepoSubscription(baseGithubUrl, repoLink);
+			await updateRepoSubscription(baseGithubUrl, repoLink, req.body.token);
 		}
 		res.status(webHook.status ? parseInt(webHook.status) : 200).send({
 			message:

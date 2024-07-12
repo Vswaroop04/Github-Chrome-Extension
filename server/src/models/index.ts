@@ -5,5 +5,5 @@ export interface User {
 	githubUrl: string;
 	githubRepos?: string[];
 	subscribedRepos?: string[];
-	extensionId?: string;
+	gcmToken?: string;
 }

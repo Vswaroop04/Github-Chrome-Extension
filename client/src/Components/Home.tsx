@@ -1,9 +1,11 @@
 import { useEffect, useState } from "react";
 import { getAccessToken } from "../fetchers/getAccessToken";
+import { getToken, messaging } from "../fireBaseConfig";
 
 // Import Tailwind CSS styles
 import "tailwindcss/tailwind.css";
 import { subscribeRepoPostReq } from "../fetchers/subscribeRepo";
+import { toast } from "react-toastify";
 
 export default function Home() {
   const [loading, setLoading] = useState<boolean>(false);
@@ -33,10 +35,12 @@ export default function Home() {
             //   console.log("Access token stored in Chrome storage");
             // });
           } else {
+            toast.error("Failed to fetch valid user repositories");
             throw new Error("Failed to fetch valid user repositories");
           }
         } catch (error) {
           console.error("Error fetching access token:", error);
+          toast.error("Error fetching access token");
         } finally {
           setLoading(false);
         }
@@ -44,8 +48,7 @@ export default function Home() {
     };
 
     fetchAccessToken();
-
-  }, []); 
+  }, []);
 
   function loginWithGithub() {
     window.location.assign(
@@ -57,12 +60,55 @@ export default function Home() {
 
   async function handleClick(repo: string) {
     // Function to handle click action
+    const vapidKey =
+      "BOyXlcVoLuoNsGDYtiD8LELrbxXgMKnQBeb0NnNu9qkDUx9fToam1uHja_6TBlr9oDWc9jVDCUdQpxTlmIDsNpY";
     console.log("Button clicked for repo:", repo);
-    const repoSub = await subscribeRepoPostReq(accessToken, repo);
-    if (!repoSub.ok) {
-      console.error("Error subscribing to repo:", repoSub.message);
-      if (repoSub != "Webhook Created") {
-        setRepoSubscribeErrorMessage(repoSub.message);
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/firebase-messaging-sw.js");
+      if ("Notification" in window) {
+        Notification.requestPermission()
+          .then((permission) => {
+            if (permission === "denied") {
+              toast.error("The user explicitly denied the permission request.");
+              return;
+            }
+            if (permission === "granted") {
+              getToken(messaging, { vapidKey })
+                .then(async (currentToken) => {
+                  if (currentToken) {
+                    const repoSub = await subscribeRepoPostReq(
+                      accessToken,
+                      repo
+                    );
+                    if (!repoSub.ok) {
+                      toast.error("Error Subscribing to Repo");
+                      if (repoSub != "Webhook Created") {
+                        setRepoSubscribeErrorMessage(repoSub.message);
+                      }
+                    }
+                  } else {
+                    toast.error(
+                      "No registration token available. Request permission to generate one."
+                    );
+                  }
+                })
+                .catch((err) => {
+                  console.error(
+                    "An error occurred while retrieving token.",
+                    err
+                  );
+                  toast.error("An error occurred while retrieving token.");
+                });
+              console.info("The user accepted the permission request.");
+            }
+          })
+          .catch((error) => {
+            console.error("Error requesting notification permission:", error);
+            toast.error("Error requesting notification permission:.");
+          });
+      } else {
+        console.error("Notifications are not supported in this browser.");
+        toast.error("Notifications are not supported in this browser.");
       }
     }
   }

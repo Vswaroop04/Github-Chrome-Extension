@@ -65,6 +65,7 @@ export const getUserByGithubUrl = async (
 export const updateRepoSubscription = async (
 	githubUrl: string,
 	repoUrlToDelete: string,
+	token: string,
 ) => {
 	try {
 		// Retrieve user by GitHub URL
@@ -93,6 +94,7 @@ export const updateRepoSubscription = async (
 		await updateDoc(doc(usersCollection, userId), {
 			githubRepos: userData.githubRepos,
 			subscribedRepos,
+			gcmToken: token,
 		});
 
 		return { githubRepos: userData.githubRepos, subscribedRepos };

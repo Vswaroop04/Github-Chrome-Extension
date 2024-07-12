@@ -5,8 +5,12 @@ import router from '@/routes';
 import 'module-alias/register';
 import PORT from '@/config/index';
 
+
 const corsOptions: cors.CorsOptions = {
-	origin: ['http://localhost:5173',"https://github-chrome-extension.vercel.app"],
+	origin: [
+		'http://localhost:5173',
+		'https://github-chrome-extension.vercel.app',
+	],
 	credentials: true,
 	optionsSuccessStatus: 200,
 };
