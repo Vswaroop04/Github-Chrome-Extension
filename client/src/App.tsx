@@ -5,9 +5,10 @@ import PrivacyPolicy from "./Components/PrivacyPolicy";
 function App() {
   return (
     <Router>
-        <Route exact path="/" component={Home} />
+        <Route path="/" component={Home} />
         <Route path="/privacy-policy" component={PrivacyPolicy} />
     </Router>
   );
 }
+
 export default App;
