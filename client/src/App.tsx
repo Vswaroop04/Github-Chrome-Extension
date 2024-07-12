@@ -1,14 +1,16 @@
-import { BrowserRouter as Router, Route, Switch } from "react-router-dom";
+import { BrowserRouter as Router, Route } from "react-router-dom";
 import Home from "./Components/Home";
 import PrivacyPolicy from "./Components/PrivacyPolicy";
 
 function App() {
   return (
     <Router>
-      <Switch>
-        <Route exact path="/" component={Home} />
-        <Route path="/privacy-policy" component={PrivacyPolicy} />
-      </Switch>
+      <Route path="/" exact>
+        <Home />
+      </Route>
+      <Route path="/privacy-policy">
+        <PrivacyPolicy />
+      </Route>
     </Router>
   );
 }
