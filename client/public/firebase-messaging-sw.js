@@ -25,4 +25,13 @@ messaging.onBackgroundMessage(function (payload) {
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
+  self.addEventListener(
+    "notificationclick",
+    function (event) {
+      if (payload.notification.data.url || event.notification.data.url) {
+        clients.openWindow(event.notification.data.url);
+      }
+    },
+    false
+  );
 });

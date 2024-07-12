@@ -15,23 +15,26 @@ export const createWebHook = async (
 	next: NextFunction,
 ) => {
 	try {
-		console.log(req.body);
 		if (!req.body.repository) {
 			return res.status(400).json({ message: 'Invalid request' });
 		}
-		const user = await getUserByGithubUrl(req.body.repository.html_url);
+		const parts = req.body.repository.html_url.split('/');
+		const baseGithubUrl = parts.slice(0, 4).join('/');
+		const user = await getUserByGithubUrl(baseGithubUrl);
 		const repoName = extractRepoNameFromUrl(req.body.repository.html_url);
 
 		await sendPushNotification(
 			user.gcmToken,
 			req.body.action == 'opened'
-				? 'New Pull Request Created'
-				: 'New Push Event',
+				? `${req.body.sender.login} created a new pull request in ${repoName}`
+				: `${req.body.pusher.name} added new commit in ${repoName}`,
 			req.body.action == 'opened'
-				? `A new pull request has been created in the repository ${repoName}. Check it out here: ${req.body.repository.html_url}`
-				: `New changes have been pushed to the repository ${repoName}. Review them here: ${req.body.repository.html_url}`,
+				? `Please take a look: A new pull request has been created in the repository ${repoName}. Click here to view: ${req.body.repository.html_url}`
+				: `New changes have been pushed to the repository ${repoName}. Click here to review: ${req.body.repository.html_url}`,
+
 			{ url: req.body.repository.html_url },
 		);
+		res.status(200).json({ message: 'Push Notification sent succesfully' });
 	} catch (error) {
 		if (error instanceof z.ZodError) {
 			res
