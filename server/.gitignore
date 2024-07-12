@@ -2,3 +2,5 @@
 /dist
 
 .env
+
+/src/utils/github-chrome-extension-firebase-adminsdk

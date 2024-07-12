@@ -1,6 +1,6 @@
 import admin from 'firebase-admin';
 
-var serviceAccount = require('../utils/github-chrome-extension-firebase-adminsdk-ox3lx-7aa9de336b.json');
+var serviceAccount = require('../utils/github-chrome-extension-firebase-adminsdk.json');
 
 admin.initializeApp({
 	credential: admin.credential.cert(serviceAccount),
