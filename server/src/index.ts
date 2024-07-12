@@ -5,7 +5,7 @@ import router from '@/routes';
 import 'module-alias/register';
 import PORT from '@/config/index';
 
-
+// Cors
 const corsOptions: cors.CorsOptions = {
 	origin: [
 		'http://localhost:5173',
