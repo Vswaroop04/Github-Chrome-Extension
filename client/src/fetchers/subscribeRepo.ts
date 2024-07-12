@@ -1,4 +1,8 @@
-export async function subscribeRepoPostReq(accessToken: string, repoLink: string) {
+export async function subscribeRepoPostReq(
+  accessToken: string,
+  repoLink: string,
+  currentToken: string
+) {
   try {
     const response = await fetch(
       `${import.meta.env.VITE_SERVER}/subscribeRepo`,
@@ -8,7 +12,7 @@ export async function subscribeRepoPostReq(accessToken: string, repoLink: string
           "Content-Type": "application/json",
           Authorization: accessToken,
         },
-        body: JSON.stringify({ repoLink }),
+        body: JSON.stringify({ repoLink, token: currentToken }),
       }
     );
     const data = await response.json();

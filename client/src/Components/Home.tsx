@@ -78,7 +78,8 @@ export default function Home() {
                   if (currentToken) {
                     const repoSub = await subscribeRepoPostReq(
                       accessToken,
-                      repo
+                      repo,
+                      currentToken
                     );
                     if (!repoSub.ok) {
                       toast.error("Error Subscribing to Repo");
