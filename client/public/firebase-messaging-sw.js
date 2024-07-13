@@ -23,13 +23,22 @@ messaging.onBackgroundMessage(function (payload) {
   };
 
   self.registration.showNotification(notificationTitle, notificationOptions);
-  self.addEventListener(
-    "notificationclick",
-    function (event) {
-      if (payload.notification.data.url || event.notification.data.url) {
-        clients.openWindow(event.notification.data.url);
-      }
-    },
-    false
-  );
+});
+
+self.addEventListener("notificationclick", async (event) => {
+  console.log("Notification clicked.");
+  event.notification.close();
+
+  let clickResponsePromise = Promise.resolve();
+  if (event.notification.data && event.notification.data.url) {
+    const url = event.notification.data.url;
+    try {
+      clickResponsePromise = clients.openWindow(url);
+    } catch (error) {
+      console.error("Error opening notification click URL:", error);
+      // Handle the error gracefully (e.g., display an error message to the user)
+    }
+  }
+
+  await event.waitUntil(clickResponsePromise);
 });
