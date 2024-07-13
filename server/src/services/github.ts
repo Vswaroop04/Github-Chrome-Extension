@@ -139,8 +139,6 @@ export const removeWebHook = async (
 			},
 		);
 		const data = await response.json();
-		console.log(data);
-
 		for (let hookData of data) {
 			if (hookData.config.url === REPO_WEBHOOK_URL) {
 				const deleteResponse = await fetch(
@@ -154,7 +152,6 @@ export const removeWebHook = async (
 						},
 					},
 				);
-				console.log(deleteResponse);
 				return deleteResponse; 
 			}
 		}

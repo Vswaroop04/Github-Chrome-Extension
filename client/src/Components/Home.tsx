@@ -98,7 +98,6 @@ export default function Home() {
     // Function to handle click action
     const vapidKey =
       "BOyXlcVoLuoNsGDYtiD8LELrbxXgMKnQBeb0NnNu9qkDUx9fToam1uHja_6TBlr9oDWc9jVDCUdQpxTlmIDsNpY";
-    console.log("Button clicked for repo:", repo);
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/firebase-messaging-sw.js");
       if ("Notification" in window) {

@@ -15,12 +15,13 @@ export const createWebHook = async (
 	next: NextFunction,
 ) => {
 	try {
-		console.log("webhook req from github")
-		console.log(req.body)
+		console.log('webhook req from github');
+		console.log(req.body);
 		if (!req.body.repository) {
 			return res.status(400).json({ message: 'Invalid request' });
 		}
-		if (req.body.pull_request || req.body.pusher) {
+		const eventType = req.headers['x-github-event'];
+		if (eventType == 'push' || eventType === 'pull_request') {
 			const parts = req.body.repository.html_url.split('/');
 			const baseGithubUrl = parts.slice(0, 4).join('/');
 			const user = await getUserByGithubUrl(baseGithubUrl);

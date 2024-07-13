@@ -2,7 +2,6 @@ export default function Home() {
   // background.js
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log(sender)
     if (message.action === "open_github_auth") {
       const url = `https://github.com/login/oauth/authorize?client_id=${message.clientId}&scope=repo read:org admin:repo_hook`;
       chrome.tabs.create({ url }, () => {
