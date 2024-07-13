@@ -25,22 +25,13 @@ export const subscribeRepo = async (
 		const baseGithubUrl = parts.slice(0, 4).join('/');
 		const user = await getUserByGithubUrl(baseGithubUrl);
 		const repoName = parts[4].toLowerCase();
-		let webHook;
-		if (user) {
-			webHook = await addWebhookForPersonalRepo(
-				accessToken,
-				owner,
-				repoName,
-				REPO_WEBHOOK_URL,
-			);
-		} else {
-			webHook = await addWebhookForOrganizationRepo(
-				accessToken,
-				owner,
-				repoName,
-				REPO_WEBHOOK_URL,
-			);
-		}
+		let webHook = await addWebhookForPersonalRepo(
+			accessToken,
+			owner,
+			repoName,
+			REPO_WEBHOOK_URL,
+		);
+
 		if (!webHook) throw Error('Issue In Creating Webhook');
 		if (webHook.active) {
 			await updateRepoSubscription(baseGithubUrl, repoLink, req.body.token);
