@@ -1,4 +1,4 @@
-import { githubConfig } from '@/config';
+import { githubConfig, REPO_WEBHOOK_URL } from '@/config';
 
 export const getAccessToken = async (code: string): Promise<string | null> => {
 	try {
@@ -117,6 +117,51 @@ export const addWebhookForPersonalRepo = async (
 		return data;
 	} catch (error) {
 		console.error('Error adding webhook:', error);
+		return false;
+	}
+};
+
+export const removeWebHook = async (
+	accessToken: string,
+	owner: string,
+	repo: string,
+) => {
+	try {
+		const response = await fetch(
+			`https://api.github.com/repos/${owner}/${repo}/hooks`,
+			{
+				method: 'GET',
+				headers: {
+					Authorization: `Bearer ${accessToken}`,
+					'Content-Type': 'application/json',
+					Accept: 'application/json',
+				},
+			},
+		);
+		const data = await response.json();
+		console.log(data);
+
+		for (let hookData of data) {
+			if (hookData.config.url === REPO_WEBHOOK_URL) {
+				const deleteResponse = await fetch(
+					`https://api.github.com/repos/${owner}/${repo}/hooks/${hookData.id}`,
+					{
+						method: 'DELETE',
+						headers: {
+							Authorization: `Bearer ${accessToken}`,
+							'Content-Type': 'application/json',
+							Accept: 'application/json',
+						},
+					},
+				);
+				console.log(deleteResponse);
+				return deleteResponse; 
+			}
+		}
+		console.log('No webhook found with matching URL');
+		return false;
+	} catch (error) {
+		console.error('Error removing webhook:', error);
 		return false;
 	}
 };

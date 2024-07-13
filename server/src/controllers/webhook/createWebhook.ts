@@ -15,6 +15,8 @@ export const createWebHook = async (
 	next: NextFunction,
 ) => {
 	try {
+		console.log("webhook req from github")
+		console.log(req.body)
 		if (!req.body.repository) {
 			return res.status(400).json({ message: 'Invalid request' });
 		}

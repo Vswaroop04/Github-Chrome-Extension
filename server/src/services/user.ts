@@ -103,3 +103,43 @@ export const updateRepoSubscription = async (
 		throw error;
 	}
 };
+
+export const updateUnSubscribeRepoSubscription = async (
+	githubUrl: string,
+	repoUrlToDelete: string,
+) => {
+	try {
+		// Retrieve user by GitHub URL
+		const querySnapshot = await getDocs(
+			query(usersCollection, where('githubUrl', '==', githubUrl)),
+		);
+		if (querySnapshot.empty) {
+			throw new Error('User not found');
+		}
+
+		// Assuming only one user per GitHub URL, retrieve the first document
+		const userDoc = querySnapshot.docs[0];
+		const userId = userDoc.id;
+		const userData = userDoc.data();
+		const index = userData.subscribedRepos.indexOf(repoUrlToDelete);
+
+		if (index !== -1) {
+			// Remove the element at the specified index
+			userData.subscribedRepos.splice(index, 1);
+		}
+
+		const githubRepos = userData.githubRepos || [];
+		githubRepos.push(repoUrlToDelete);
+
+		// Update user document
+		await updateDoc(doc(usersCollection, userId), {
+			githubRepos,
+			subscribedRepos: userData.subscribedRepos,
+		});
+
+		return { subscribedRepos: userData.subscribedRepos, githubRepos };
+	} catch (error) {
+		console.error('Error updating repo subscription:', error);
+		throw error;
+	}
+};

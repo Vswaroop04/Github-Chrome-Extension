@@ -1,6 +1,7 @@
 import {
 	addWebhookForOrganizationRepo,
 	addWebhookForPersonalRepo,
+	getUserData,
 } from '@/services/github';
 import { Request, Response, NextFunction } from 'express';
 import { z } from 'zod';
@@ -23,7 +24,7 @@ export const subscribeRepo = async (
 		const parts = repoLink.split('/');
 		const owner = parts[3].toLowerCase();
 		const baseGithubUrl = parts.slice(0, 4).join('/');
-		const user = await getUserByGithubUrl(baseGithubUrl);
+		const user = await getUserData(accessToken);
 		const repoName = parts[4].toLowerCase();
 		let webHook = await addWebhookForPersonalRepo(
 			accessToken,
@@ -34,7 +35,7 @@ export const subscribeRepo = async (
 
 		if (!webHook) throw Error('Issue In Creating Webhook');
 		if (webHook.active) {
-			await updateRepoSubscription(baseGithubUrl, repoLink, req.body.token);
+			await updateRepoSubscription(user.html_url, repoLink, req.body.token);
 		}
 		res.status(webHook.status ? parseInt(webHook.status) : 200).send({
 			message:

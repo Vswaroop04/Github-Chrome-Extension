@@ -18,6 +18,8 @@ export const accessCodeSchema = z.object({
 export const repoLinkValidator = z.object({
 	repoLink: z.string().min(1, 'ID is required'),
 });
-
+export const accessTokenSchema = z.object({
+	accessToken: z.string().min(1, 'ID is required'),
+});
 
 export type User = z.infer<typeof userSchemaValidator>;
